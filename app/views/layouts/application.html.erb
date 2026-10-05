@@ -24,6 +24,16 @@
   </head>
 
   <body>
+    <nav>
+      <% if user_signed_in? %>
+        <p>Вы вошли как: <%= current_user.email %></p>
+        <%= button_to "Выйти", destroy_user_session_path, method: :delete, data: { turbo_method: :delete } %>
+      <% else %>
+        <%= link_to "Войти", new_user_session_path %> |
+        <%= link_to "Зарегистрироваться", new_user_registration_path %>
+      <% end %>
+    </nav>
+
     <%= yield %>
   </body>
 </html>
