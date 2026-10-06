@@ -27,6 +27,7 @@
     <nav class="navbar">
       <% if user_signed_in? %>
         <span>Вы вошли как: <%= current_user.email %></span>
+        <%= link_to "Мой вишлист", wishes_path %>
         <%= button_to "Выйти", destroy_user_session_path, method: :delete %>
       <% else %>
         <div class="nav-links">
