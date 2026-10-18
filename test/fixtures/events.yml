@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  description: MyText
+  budget: 1
+  exchange_date: 2026-10-18
+  invite_code: MyString
+  status: 1
+  organizer: one
+
+two:
+  name: MyString
+  description: MyText
+  budget: 1
+  exchange_date: 2026-10-18
+  invite_code: MyString
+  status: 1
+  organizer: two

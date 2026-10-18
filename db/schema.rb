@@ -10,9 +10,56 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_110636) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_18_143459) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "assignments", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.bigint "santa_id", null: false
+    t.bigint "giftee_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "giftee_id"], name: "index_assignments_on_event_id_and_giftee_id", unique: true
+    t.index ["event_id", "santa_id"], name: "index_assignments_on_event_id_and_santa_id", unique: true
+    t.index ["event_id"], name: "index_assignments_on_event_id"
+    t.index ["giftee_id"], name: "index_assignments_on_giftee_id"
+    t.index ["santa_id"], name: "index_assignments_on_santa_id"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.integer "budget"
+    t.date "exchange_date"
+    t.string "invite_code"
+    t.integer "status", default: 0, null: false
+    t.bigint "organizer_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invite_code"], name: "index_events_on_invite_code", unique: true
+    t.index ["organizer_id"], name: "index_events_on_organizer_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.bigint "assignment_id", null: false
+    t.bigint "sender_id", null: false
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignment_id"], name: "index_messages_on_assignment_id"
+    t.index ["sender_id"], name: "index_messages_on_sender_id"
+  end
+
+  create_table "participations", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "user_id"], name: "index_participations_on_event_id_and_user_id", unique: true
+    t.index ["event_id"], name: "index_participations_on_event_id"
+    t.index ["user_id"], name: "index_participations_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -36,5 +83,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_110636) do
     t.index ["user_id"], name: "index_wishes_on_user_id"
   end
 
+  add_foreign_key "assignments", "events"
+  add_foreign_key "assignments", "users", column: "giftee_id"
+  add_foreign_key "assignments", "users", column: "santa_id"
+  add_foreign_key "events", "users", column: "organizer_id"
+  add_foreign_key "messages", "assignments"
+  add_foreign_key "messages", "users", column: "sender_id"
+  add_foreign_key "participations", "events"
+  add_foreign_key "participations", "users"
   add_foreign_key "wishes", "users"
 end
