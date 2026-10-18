@@ -1,0 +1,15 @@
+<h1>Мои игры</h1>
+
+<% if @events.any? %>
+  <% @events.each do |event| %>
+    <div class="card">
+      <h2><%= link_to event.name, event %></h2>
+      <p><span class="badge"><%= event.drawn? ? "Жеребьёвка проведена" : "Набор участников" %></span></p>
+      <% if event.budget %><p>Бюджет: <%= event.budget %> ₽</p><% end %>
+    </div>
+  <% end %>
+<% else %>
+  <p>У вас пока нет игр.</p>
+<% end %>
+
+<%= link_to "Создать игру", new_event_path, class: "btn btn-primary" %>

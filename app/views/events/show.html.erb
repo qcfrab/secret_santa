@@ -1,0 +1,43 @@
+<h1><%= @event.name %></h1>
+<p><span class="badge"><%= @event.drawn? ? "Жеребьёвка проведена" : "Набор участников" %></span></p>
+
+<% if @event.description.present? %><p><%= @event.description %></p><% end %>
+<% if @event.budget %><p>Бюджет: <%= @event.budget %> ₽</p><% end %>
+<% if @event.exchange_date %><p>Дата обмена: <%= @event.exchange_date %></p><% end %>
+
+<h2>Участники (<%= @event.users.count %>)</h2>
+<ul>
+  <% @event.users.each do |user| %>
+    <li><%= user.display_name %><%= " (организатор)" if user == @event.organizer %></li>
+  <% end %>
+</ul>
+
+<% if @event.waiting? %>
+  <h2>Ссылка-приглашение</h2>
+  <input type="text" value="<%= join_url(code: @event.invite_code) %>" readonly>
+<% end %>
+
+<% if current_user == @event.organizer && @event.waiting? %>
+  <% if @event.can_draw? %>
+    <%= button_to "Провести жеребьёвку", draw_event_path(@event), class: "btn btn-primary" %>
+  <% else %>
+    <p>Для жеребьёвки нужно минимум <%= Event::MIN_PARTICIPANTS %> участника.</p>
+  <% end %>
+<% end %>
+
+<% if @event.drawn? %>
+  <% if @santa_assignment %>
+    <div class="card">
+      <h2>Вы дарите подарок: <%= @santa_assignment.giftee.display_name %></h2>
+      <%= link_to "Вишлист и чат", assignment_path(@santa_assignment), class: "btn btn-primary" %>
+    </div>
+  <% end %>
+  <% if @giftee_assignment %>
+    <div class="card">
+      <h2>Ваш Тайный Санта</h2>
+      <%= link_to "Открыть чат", assignment_path(@giftee_assignment), class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+<% end %>
+
+<p><%= link_to "К списку игр", events_path %></p>

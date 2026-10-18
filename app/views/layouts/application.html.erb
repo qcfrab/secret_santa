@@ -27,6 +27,7 @@
     <nav class="navbar">
       <% if user_signed_in? %>
         <span>Вы вошли как: <%= current_user.email %></span>
+        <%= link_to "Мои игры", events_path %>
         <%= link_to "Мой вишлист", wishes_path %>
         <%= button_to "Выйти", destroy_user_session_path, method: :delete %>
       <% else %>
@@ -38,6 +39,8 @@
     </nav>
 
     <main class="container <%= 'container-narrow' if devise_controller? %>">
+      <% if notice %><p class="alert-notice"><%= notice %></p><% end %>
+      <% if alert %><p class="alert-error"><%= alert %></p><% end %>
       <%= yield %>
     </main>
   </body>

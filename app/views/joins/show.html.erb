@@ -1,0 +1,8 @@
+<h1>Вас приглашают в игру «<%= @event.name %>»</h1>
+<p>Организатор: <%= @event.organizer.display_name %></p>
+
+<% if @event.waiting? %>
+  <%= button_to "Участвовать", join_path(code: @event.invite_code), class: "btn btn-primary" %>
+<% else %>
+  <p>Жеребьёвка в этой игре уже проведена, присоединиться нельзя.</p>
+<% end %>

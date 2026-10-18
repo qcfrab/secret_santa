@@ -1,0 +1,30 @@
+<%= form_with(model: event) do |form| %>
+  <% if event.errors.any? %>
+    <div class="alert-error">
+      <ul>
+        <% event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name, "Название" %>
+    <%= form.text_field :name %>
+  </div>
+  <div class="field">
+    <%= form.label :description, "Описание" %>
+    <%= form.text_area :description %>
+  </div>
+  <div class="field">
+    <%= form.label :budget, "Бюджет подарка, ₽" %>
+    <%= form.number_field :budget %>
+  </div>
+  <div class="field">
+    <%= form.label :exchange_date, "Дата обмена подарками" %>
+    <%= form.date_field :exchange_date %>
+  </div>
+
+  <%= form.submit "Создать игру", class: "btn btn-primary" %>
+<% end %>

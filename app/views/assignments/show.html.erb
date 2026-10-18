@@ -1,0 +1,39 @@
+<% is_santa = current_user.id == @assignment.santa_id %>
+
+<h1><%= is_santa ? "Вы дарите подарок: #{@assignment.giftee.display_name}" : "Чат с вашим Тайным Сантой" %></h1>
+<p><%= link_to "← К игре", @assignment.event %></p>
+
+<% if is_santa %>
+  <h2>Вишлист</h2>
+  <% wishes = @assignment.giftee_wishes %>
+  <% if wishes.any? %>
+    <% wishes.each do |wish| %>
+      <div class="card">
+        <h3><%= wish.title %></h3>
+        <% if wish.description.present? %><p><%= wish.description %></p><% end %>
+        <% if wish.url.present? %><p><%= link_to "Ссылка", wish.url, target: "_blank", rel: "noopener" %></p><% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <p>Получатель пока ничего не добавил в вишлист.</p>
+  <% end %>
+<% end %>
+
+<h2>Чат</h2>
+<% if @messages.empty? %>
+  <p>Сообщений пока нет.</p>
+<% end %>
+<% @messages.each do |message| %>
+  <% mine = message.sender_id == current_user.id %>
+  <div class="chat-bubble <%= 'mine' if mine %>">
+    <small><%= mine ? "Вы" : @assignment.chat_partner_name_for(current_user) %></small>
+    <p><%= message.body %></p>
+  </div>
+<% end %>
+
+<%= form_with(model: [@assignment, @message]) do |form| %>
+  <div class="field">
+    <%= form.text_area :body, rows: 3, placeholder: "Напишите сообщение..." %>
+  </div>
+  <%= form.submit "Отправить", class: "btn btn-primary" %>
+<% end %>
