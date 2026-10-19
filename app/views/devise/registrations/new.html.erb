@@ -1,0 +1,39 @@
+<% content_for :title, "Регистрация" %>
+
+<h1>Регистрация</h1>
+
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+  <div class="field">
+    <%= f.label :nickname, "Ваш ник" %>
+    <%= f.text_field :nickname, autofocus: true%>
+    <%= field_error(resource, :nickname) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :email, "Электронная почта" %>
+    <%= f.email_field :email, class: field_class(resource, :email) %>
+    <%= field_error(resource, :email) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :password, "Пароль" %>
+    <% if @minimum_password_length %>
+      <small style="color: var(--text-muted);">(минимум <%= @minimum_password_length %> символов)</small>
+    <% end %>
+    <%= f.password_field :password, autocomplete: "new-password" %>
+    <%= field_error(resource, :password) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :password_confirmation, "Подтверждение пароля" %>
+    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+  </div>
+
+  <div style="margin-top: 1.5rem;">
+    <%= f.submit "Зарегистрироваться", class: "btn btn-primary", style: "width: 100%;" %>
+  </div>
+<% end %>
+
+<div style="margin-top: 1.25rem; text-align: center;">
+  <%= render "devise/shared/links" %>
+</div>

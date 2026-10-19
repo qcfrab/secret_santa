@@ -1,0 +1,10 @@
+<% if resource.errors.any? %>
+  <div class="alert-error" style="margin-bottom: 1.25rem;">
+    <strong>Пожалуйста, исправьте следующие ошибки:</strong>
+    <ul style="margin: 0.5rem 0 0 1.2rem; padding: 0;">
+      <% resource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

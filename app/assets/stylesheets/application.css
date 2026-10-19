@@ -587,6 +587,17 @@ input[readonly] {
     margin-bottom: 1.5rem;
 }
 
+.input-error {
+    border-color: #a8384a !important;
+    background-color: #fdf0f1;
+}
+
+.field-error {
+    color: #a8384a;
+    font-size: 0.875rem;
+    margin: 0.25rem 0 0;
+}
+
 /* --- Секция Героя (Главная страница) --- */
 .hero {
     background-color: var(--bg-surface);

@@ -35,7 +35,7 @@
         <%= link_to "Мой вишлист", wishes_path, class: "nav-link" %>
       </div>
       <div class="nav-user">
-        <span class="user-email"><%= current_user.email %></span>
+        <%= link_to "#{current_user.display_name}", edit_user_registration_path, class: "nav-link", title: "Изменить профиль и никнейм" %>
         <%= button_to "Выйти", destroy_user_session_path, method: :delete, class: "btn btn-outline btn-sm" %>
       </div>
     <% else %>
