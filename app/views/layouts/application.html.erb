@@ -1,47 +1,56 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= content_for(:title) || "Secret Santa" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Secret Santa">
-    <meta name="mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<html lang="ru">
+<head>
+  <title><%= content_for(:title) || "Тайный Санта" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Secret Santa">
+  <meta name="mobile-web-app-capable" content="yes">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <%= yield :head %>
+  <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+  <!-- Подключение шрифтов Playfair Display и Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="icon" href="/icon.png" type="image/png">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
+  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+</head>
 
-  <body>
-    <nav class="navbar">
-      <% if user_signed_in? %>
-        <span>Вы вошли как: <%= current_user.email %></span>
-        <%= link_to "Мои игры", events_path %>
-        <%= link_to "Мой вишлист", wishes_path %>
-        <%= button_to "Выйти", destroy_user_session_path, method: :delete %>
-      <% else %>
-        <div class="nav-links">
-          <%= link_to "Войти", new_user_session_path %>
-          <%= link_to "Зарегистрироваться", new_user_registration_path %>
-        </div>
-      <% end %>
-    </nav>
+<body>
+<header class="navbar">
+  <div class="navbar-inner">
+    <%= link_to "Тайный Санта", root_path, class: "navbar-brand" %>
 
-    <main class="container <%= 'container-narrow' if devise_controller? %>">
-      <% if notice %><p class="alert-notice"><%= notice %></p><% end %>
-      <% if alert %><p class="alert-error"><%= alert %></p><% end %>
-      <%= yield %>
-    </main>
-  </body>
+    <% if user_signed_in? %>
+      <div class="nav-links">
+        <%= link_to "Мои игры", events_path, class: "nav-link" %>
+        <%= link_to "Мой вишлист", wishes_path, class: "nav-link" %>
+      </div>
+      <div class="nav-user">
+        <span class="user-email"><%= current_user.email %></span>
+        <%= button_to "Выйти", destroy_user_session_path, method: :delete, class: "btn btn-outline btn-sm" %>
+      </div>
+    <% else %>
+      <div class="nav-links">
+        <%= link_to "Войти", new_user_session_path, class: "nav-link" %>
+        <%= link_to "Зарегистрироваться", new_user_registration_path, class: "btn btn-primary btn-sm" %>
+      </div>
+    <% end %>
+  </div>
+</header>
+
+<main class="container <%= 'container-narrow' if devise_controller? %>">
+  <% if notice %><div class="alert-notice"><%= notice %></div><% end %>
+  <% if alert %><div class="alert-error"><%= alert %></div><% end %>
+  <%= yield %>
+</main>
+</body>
 </html>
