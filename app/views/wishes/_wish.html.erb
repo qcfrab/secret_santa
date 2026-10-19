@@ -1,22 +1,33 @@
-<div id="<%= dom_id wish %>">
-  <div>
-    <strong>Title:</strong>
-    <%= wish.title %>
+<div id="<%= dom_id wish %>" class="wish-card">
+  <div class="wish-image-wrap">
+    <% if wish.respond_to?(:image) && wish.image.attached? %>
+      <%= image_tag wish.image, alt: wish.title, class: "wish-image" %>
+    <% else %>
+      <span class="wish-placeholder" title="Изображение подарка">🎁</span>
+    <% end %>
   </div>
 
-  <div>
-    <strong>Description:</strong>
-    <%= wish.description %>
-  </div>
+  <div class="wish-body">
+    <h3 class="wish-title"><%= wish.title %></h3>
 
-  <div>
-    <strong>Url:</strong>
-    <%= wish.url %>
-  </div>
+    <% if wish.description.present? %>
+      <p class="wish-desc"><%= wish.description %></p>
+    <% else %>
+      <p class="wish-desc">Без дополнительного описания</p>
+    <% end %>
 
-  <div>
-    <strong>User:</strong>
-    <%= wish.user_id %>
-  </div>
+    <div class="wish-actions">
+      <% if wish.url.present? %>
+        <%= link_to "Где купить ↗", wish.url, target: "_blank", rel: "noopener", class: "btn btn-outline btn-sm" %>
+      <% else %>
+        <span class="badge">Без ссылки</span>
+      <% end %>
 
+      <% if defined?(current_user) && current_user&.id == wish.user_id %>
+        <div style="display: flex; gap: 0.4rem;">
+          <%= link_to "Изменить", edit_wish_path(wish), class: "btn btn-secondary btn-sm" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
 </div>

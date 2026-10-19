@@ -1,2 +1,140 @@
-<h1>Home#index</h1>
-<p>Find me in app/views/home/index.html.erb</p>
+<!-- 1. Главный экран сайта -->
+<section class="hero">
+  <span class="badge badge-waiting" style="margin-bottom: 1rem;">Сезон подарков открыт</span>
+  <h1>Тайный Санта для друзей и коллег</h1>
+  <p>Создавайте закрытые комнаты, проводите автоматическую жеребьёвку, делитесь вишлистами с картинками и общайтесь в анонимном чате.</p>
+  <div class="hero-actions">
+    <% if user_signed_in? %>
+      <%= link_to "Перейти к моим играм", events_path, class: "btn btn-primary" %>
+      <%= link_to "Заполнить мой вишлист", wishes_path, class: "btn btn-secondary" %>
+    <% else %>
+      <%= link_to "Начать игру", new_user_registration_path, class: "btn btn-primary" %>
+      <%= link_to "Войти в аккаунт", new_user_session_path, class: "btn btn-outline" %>
+    <% end %>
+  </div>
+</section>
+
+<!-- 2. ВИТРИНА UI-КОМПОНЕНТОВ (Для показа преподавателю) -->
+<section class="ui-kit-showcase" style="margin-top: 3.5rem;">
+  <div class="page-header">
+    <div>
+      <h1>UI-кит: все элементы кор-функционала</h1>
+      <p style="color: var(--text-muted); margin-bottom: 0;">Демонстрация типографики, кнопок, карточек вишлиста с картинками, пагинации, форм и чата</p>
+    </div>
+  </div>
+
+  <!-- 2.1. Палитра и Кнопки -->
+  <div class="card">
+    <h2>1. Кнопки, бейджи и статусы игры</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem;">
+      <button type="button" class="btn btn-primary">Главная кнопка (#9F424C)</button>
+      <button type="button" class="btn btn-secondary">Дополнительная (#526B58)</button>
+      <button type="button" class="btn btn-outline">Контурная кнопка</button>
+      <button type="button" class="btn btn-danger btn-sm">Удалить</button>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+      <span class="badge badge-waiting">⏳ Набор участников</span>
+      <span class="badge badge-drawn">✓ Жеребьёвка проведена</span>
+      <span class="participant-chip organizer">Анна ★ организатор</span>
+      <span class="participant-chip">Максим</span>
+      <span class="participant-chip">Екатерина</span>
+    </div>
+  </div>
+
+  <!-- 2.2. Вишлист с картинками и пагинацией -->
+  <h2>2. Карточки вишлиста (с изображениями и пагинацией)</h2>
+  <div class="wishes-grid">
+    <div class="wish-card">
+      <div class="wish-image-wrap">
+        <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80" alt="Книга" class="wish-image">
+      </div>
+      <div class="wish-body">
+        <h3 class="wish-title">Артбук по любимой игре</h3>
+        <p class="wish-desc">В твёрдом переплёте, желательно на английском или русском языке.</p>
+        <div class="wish-actions">
+          <a href="#" class="btn btn-outline btn-sm">Где купить ↗</a>
+          <a href="#" class="btn btn-secondary btn-sm">Изменить</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="wish-card">
+      <div class="wish-image-wrap">
+        <img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=600&q=80" alt="Кружка" class="wish-image">
+      </div>
+      <div class="wish-body">
+        <h3 class="wish-title">Керамическая кружка ручной работы</h3>
+        <p class="wish-desc">Тёплых природных оттенков, объёмом от 350 мл для какао.</p>
+        <div class="wish-actions">
+          <a href="#" class="btn btn-outline btn-sm">Где купить ↗</a>
+          <a href="#" class="btn btn-secondary btn-sm">Изменить</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="wish-card">
+      <div class="wish-image-wrap">
+        <span class="wish-placeholder">🎁</span>
+      </div>
+      <div class="wish-body">
+        <h3 class="wish-title">Набор новогодних сладостей</h3>
+        <p class="wish-desc">Любой бельгийский или горький шоколад, имбирное печенье.</p>
+        <div class="wish-actions">
+          <span class="badge">Без ссылки</span>
+          <a href="#" class="btn btn-secondary btn-sm">Изменить</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="pagination">
+    <a href="#" class="page-link disabled">← Назад</a>
+    <a href="#" class="page-link active">1</a>
+    <a href="#" class="page-link">2</a>
+    <a href="#" class="page-link">3</a>
+    <a href="#" class="page-link">Вперёд →</a>
+  </nav>
+
+  <!-- 2.3. Анонимный чат Санты и получателя -->
+  <h2>3. Компонент анонимного чата</h2>
+  <div class="chat-box">
+    <div class="chat-messages">
+      <div class="chat-bubble">
+        <small>Ваш Тайный Санта</small>
+        <p>Привет! Подскажи, пожалуйста, какой цвет шарфа тебе больше нравится — изумрудный или бордовый? 🎄</p>
+      </div>
+      <div class="chat-bubble mine">
+        <small>Вы</small>
+        <p>Привет, Санта! Изумрудный будет просто супер, спасибо большое!</p>
+      </div>
+    </div>
+    <div class="field">
+      <textarea rows="2" placeholder="Напишите сообщение..."></textarea>
+    </div>
+    <button type="button" class="btn btn-primary">Отправить сообщение</button>
+  </div>
+
+  <!-- 2.4. Форма создания игры / желания -->
+  <h2>4. Формы ввода и инвайт-ссылки</h2>
+  <div class="card">
+    <div class="field">
+      <label>Название игры</label>
+      <input type="text" value="Тайный Санта ИКТИБ 2027">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div class="field">
+        <label>Бюджет подарка, ₽</label>
+        <input type="number" value="1500">
+      </div>
+      <div class="field">
+        <label>Дата обмена подарками</label>
+        <input type="date" value="2026-12-28">
+      </div>
+    </div>
+    <div class="field">
+      <label>Ссылка-приглашение (только для чтения)</label>
+      <input type="text" value="https://secret-santa.local/join/santa-2027-invite" readonly>
+    </div>
+    <button type="button" class="btn btn-primary">Сохранить настройки</button>
+  </div>
+</section>

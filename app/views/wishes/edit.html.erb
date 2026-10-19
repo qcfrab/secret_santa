@@ -1,12 +1,12 @@
-<% content_for :title, "Editing wish" %>
+<% content_for :title, "Редактирование желания" %>
 
-<h1>Editing wish</h1>
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+  <h1>Редактировать желание</h1>
+  <%= render "form", wish: @wish %>
 
-<%= render "form", wish: @wish %>
-
-<br>
-
-<div>
-  <%= link_to "Show this wish", @wish %> |
-  <%= link_to "Back to wishes", wishes_path %>
+  <hr style="border: none; border-top: 1px solid var(--accent); margin: 1.5rem 0;">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <span style="font-size: 0.9rem; color: var(--text-muted);">Больше не актуально?</span>
+    <%= button_to "Удалить желание", @wish, method: :delete, class: "btn btn-danger btn-sm" %>
+  </div>
 </div>

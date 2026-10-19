@@ -1,8 +1,7 @@
 <%= form_with(model: wish) do |form| %>
   <% if wish.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(wish.errors.count, "error") %> prohibited this wish from being saved:</h2>
-
+    <div class="alert-error">
+      <strong>Не удалось сохранить желание:</strong>
       <ul>
         <% wish.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -11,22 +10,28 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :title, style: "display: block" %>
-    <%= form.text_field :title %>
+  <div class="field">
+    <%= form.label :title, "Название подарка" %>
+    <%= form.text_field :title, placeholder: "Например: Виниловая пластинка или тёплый шарф" %>
   </div>
 
-  <div>
-    <%= form.label :description, style: "display: block" %>
-    <%= form.textarea :description %>
+  <div class="field">
+    <%= form.label :description, "Описание (цвет, размер, пожелания)" %>
+    <%= form.text_area :description, rows: 3, placeholder: "Любые детали, которые помогут не ошибиться с выбором..." %>
   </div>
 
-  <div>
-    <%= form.label :url, style: "display: block" %>
-    <%= form.text_field :url %>
+  <div class="field">
+    <%= form.label :url, "Ссылка на магазин / маркетплейс" %>
+    <%= form.text_field :url, placeholder: "https://..." %>
   </div>
 
-  <div>
-    <%= form.submit %>
+  <div class="field">
+    <%= form.label :image, "Загрузить картинку подарка" %>
+    <%= form.file_field :image, accept: "image/png, image/jpeg, image/jpg, image/webp", class: "file-input" %>
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem;">
+    <%= form.submit "Сохранить желание", class: "btn btn-primary" %>
+    <%= link_to "Отмена", wishes_path, class: "btn btn-outline" %>
   </div>
 <% end %>

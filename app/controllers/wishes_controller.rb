@@ -2,8 +2,17 @@ class WishesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_wish, only: %i[show edit update destroy]
 
+  PER_PAGE = 6
+
   def index
-    @wishes = current_user.wishes
+    scope = defined?(current_user) && current_user ? current_user.wishes.order(created_at: :desc) : Wish.order(created_at: :desc)
+
+    @page = [params.fetch(:page, 1).to_i, 1].max
+    @total_count = scope.count
+    @total_pages = [(@total_count.to_f / PER_PAGE).ceil, 1].max
+    @page = @total_pages if @page > @total_pages
+
+    @wishes = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE)
   end
 
   def show
@@ -45,6 +54,6 @@ class WishesController < ApplicationController
   end
 
   def wish_params
-    params.require(:wish).permit(:title, :description, :url)
+    params.require(:wish).permit(:title, :description, :url, :image)
   end
 end

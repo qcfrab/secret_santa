@@ -1,43 +1,72 @@
-<h1><%= @event.name %></h1>
-<p><span class="badge"><%= @event.drawn? ? "Жеребьёвка проведена" : "Набор участников" %></span></p>
+<p><%= link_to "← К списку игр", events_path %></p>
 
-<% if @event.description.present? %><p><%= @event.description %></p><% end %>
-<% if @event.budget %><p>Бюджет: <%= @event.budget %> ₽</p><% end %>
-<% if @event.exchange_date %><p>Дата обмена: <%= @event.exchange_date %></p><% end %>
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <h1 style="margin-bottom: 0.25rem;"><%= @event.name %></h1>
+    <span class="badge <%= @event.drawn? ? 'badge-drawn' : 'badge-waiting' %>">
+      <%= @event.drawn? ? "✓ Жеребьёвка проведена" : "⏳ Набор участников" %>
+    </span>
+  </div>
 
-<h2>Участники (<%= @event.users.count %>)</h2>
-<ul>
-  <% @event.users.each do |user| %>
-    <li><%= user.display_name %><%= " (организатор)" if user == @event.organizer %></li>
+  <% if @event.description.present? %>
+    <p style="margin-top: 0.75rem;"><%= @event.description %></p>
   <% end %>
-</ul>
 
-<% if @event.waiting? %>
-  <h2>Ссылка-приглашение</h2>
-  <input type="text" value="<%= join_url(code: @event.invite_code) %>" readonly>
-<% end %>
+  <div class="event-meta">
+    <% if @event.budget %>
+      <div>🎁 <strong>Бюджет:</strong> <%= @event.budget %> ₽</div>
+    <% end %>
+    <% if @event.exchange_date %>
+      <div>📅 <strong>Дата обмена:</strong> <%= @event.exchange_date %></div>
+    <% end %>
+    <div>👥 <strong>Участников:</strong> <%= @event.users.count %></div>
+  </div>
 
-<% if current_user == @event.organizer && @event.waiting? %>
-  <% if @event.can_draw? %>
-    <%= button_to "Провести жеребьёвку", draw_event_path(@event), class: "btn btn-primary" %>
-  <% else %>
-    <p>Для жеребьёвки нужно минимум <%= Event::MIN_PARTICIPANTS %> участника.</p>
+  <h3>Участники (<%= @event.users.count %>)</h3>
+  <ul class="participants-list">
+    <% @event.users.each do |user| %>
+      <li class="participant-chip <%= 'organizer' if user == @event.organizer %>">
+        <%= user.display_name %><%= " ★ организатор" if user == @event.organizer %>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if @event.waiting? %>
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Ссылка-приглашение для друзей:</label>
+      <input type="text" value="<%= join_url(code: @event.invite_code) %>" readonly onclick="this.select()">
+    </div>
   <% end %>
-<% end %>
+
+  <% if current_user == @event.organizer && @event.waiting? %>
+    <% if @event.can_draw? %>
+      <%= button_to "🎲 Провести жеребьёвку", draw_event_path(@event), class: "btn btn-primary" %>
+    <% else %>
+      <p style="color: var(--text-muted); margin-bottom: 0;">
+        Для проведения жеребьёвки нужно минимум <%= Event::MIN_PARTICIPANTS %> участника.
+      </p>
+    <% end %>
+  <% end %>
+</div>
 
 <% if @event.drawn? %>
-  <% if @santa_assignment %>
-    <div class="card">
-      <h2>Вы дарите подарок: <%= @santa_assignment.giftee.display_name %></h2>
-      <%= link_to "Вишлист и чат", assignment_path(@santa_assignment), class: "btn btn-primary" %>
-    </div>
-  <% end %>
-  <% if @giftee_assignment %>
-    <div class="card">
-      <h2>Ваш Тайный Санта</h2>
-      <%= link_to "Открыть чат", assignment_path(@giftee_assignment), class: "btn btn-secondary" %>
-    </div>
-  <% end %>
-<% end %>
+  <div class="events-grid">
+    <% if @santa_assignment %>
+      <div class="card">
+        <span class="badge badge-waiting" style="margin-bottom: 0.75rem;">Миссия Санты</span>
+        <h2>Вы дарите подарок: <%= @santa_assignment.giftee.display_name %></h2>
+        <p style="color: var(--text-muted);">Изучите вишлист получателя или задайте анонимный вопрос в чате.</p>
+        <%= link_to "Вишлист и чат →", assignment_path(@santa_assignment), class: "btn btn-primary" %>
+      </div>
+    <% end %>
 
-<p><%= link_to "К списку игр", events_path %></p>
+    <% if @giftee_assignment %>
+      <div class="card">
+        <span class="badge badge-drawn" style="margin-bottom: 0.75rem;">Ваш даритель</span>
+        <h2>Чат с вашим Тайным Сантой</h2>
+        <p style="color: var(--text-muted);">Санта остаётся анонимным, но вы можете переписываться с ним здесь.</p>
+        <%= link_to "Открыть чат →", assignment_path(@giftee_assignment), class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

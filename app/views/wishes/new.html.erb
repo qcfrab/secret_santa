@@ -1,11 +1,6 @@
-<% content_for :title, "New wish" %>
+<% content_for :title, "Новое желание" %>
 
-<h1>New wish</h1>
-
-<%= render "form", wish: @wish %>
-
-<br>
-
-<div>
-  <%= link_to "Back to wishes", wishes_path %>
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+  <h1>Новое желание</h1>
+  <%= render "form", wish: @wish %>
 </div>

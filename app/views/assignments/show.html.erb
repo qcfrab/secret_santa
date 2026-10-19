@@ -1,39 +1,68 @@
 <% is_santa = current_user.id == @assignment.santa_id %>
 
+<p><%= link_to "← Вернуться к игре «#{@assignment.event.name}»", @assignment.event %></p>
+
 <h1><%= is_santa ? "Вы дарите подарок: #{@assignment.giftee.display_name}" : "Чат с вашим Тайным Сантой" %></h1>
-<p><%= link_to "← К игре", @assignment.event %></p>
 
 <% if is_santa %>
-  <h2>Вишлист</h2>
-  <% wishes = @assignment.giftee_wishes %>
+  <h2>Вишлист получателя</h2>
+  <% all_wishes = @assignment.giftee_wishes %>
+  <% wish_page = [params.fetch(:wish_page, 1).to_i, 1].max %>
+  <% per_page = 3 %>
+  <% total_wish_pages = [(all_wishes.count.to_f / per_page).ceil, 1].max %>
+  <% wishes = all_wishes.offset((wish_page - 1) * per_page).limit(per_page) %>
+
   <% if wishes.any? %>
-    <% wishes.each do |wish| %>
-      <div class="card">
-        <h3><%= wish.title %></h3>
-        <% if wish.description.present? %><p><%= wish.description %></p><% end %>
-        <% if wish.url.present? %><p><%= link_to "Ссылка", wish.url, target: "_blank", rel: "noopener" %></p><% end %>
-      </div>
-    <% end %>
+    <div class="wishes-grid">
+      <% wishes.each do |wish| %>
+        <%= render "wishes/wish", wish: wish %>
+      <% end %>
+    </div>
+
+    <nav class="pagination" aria-label="Пагинация вишлиста получателя">
+      <% if wish_page > 1 %>
+        <%= link_to "← Назад", assignment_path(@assignment, wish_page: wish_page - 1), class: "page-link" %>
+      <% else %>
+        <span class="page-link disabled">← Назад</span>
+      <% end %>
+
+      <% (1..[total_wish_pages, 2].max).each do |p| %>
+        <%= link_to p, assignment_path(@assignment, wish_page: p), class: "page-link #{'active' if p == wish_page}" %>
+      <% end %>
+
+      <% if wish_page < total_wish_pages %>
+        <%= link_to "Вперёд →", assignment_path(@assignment, wish_page: wish_page + 1), class: "page-link" %>
+      <% else %>
+        <span class="page-link disabled">Вперёд →</span>
+      <% end %>
+    </nav>
   <% else %>
-    <p>Получатель пока ничего не добавил в вишлист.</p>
+    <div class="card">
+      <p style="margin-bottom: 0; color: var(--text-muted);">Получатель пока ничего не добавил в свой вишлист.</p>
+    </div>
   <% end %>
 <% end %>
 
-<h2>Чат</h2>
-<% if @messages.empty? %>
-  <p>Сообщений пока нет.</p>
-<% end %>
-<% @messages.each do |message| %>
-  <% mine = message.sender_id == current_user.id %>
-  <div class="chat-bubble <%= 'mine' if mine %>">
-    <small><%= mine ? "Вы" : @assignment.chat_partner_name_for(current_user) %></small>
-    <p><%= message.body %></p>
-  </div>
-<% end %>
+<h2>Анонимный чат</h2>
+<div class="chat-box">
+  <div class="chat-messages">
+    <% if @messages.empty? %>
+      <p style="color: var(--text-muted); text-align: center; margin: 1.5rem 0;">Сообщений пока нет. Напишите первым!</p>
+    <% end %>
 
-<%= form_with(model: [@assignment, @message]) do |form| %>
-  <div class="field">
-    <%= form.text_area :body, rows: 3, placeholder: "Напишите сообщение..." %>
+    <% @messages.each do |message| %>
+      <% mine = message.sender_id == current_user.id %>
+      <div class="chat-bubble <%= 'mine' if mine %>">
+        <small><%= mine ? "Вы" : @assignment.chat_partner_name_for(current_user) %></small>
+        <p><%= message.body %></p>
+      </div>
+    <% end %>
   </div>
-  <%= form.submit "Отправить", class: "btn btn-primary" %>
-<% end %>
+
+  <%= form_with(model: [@assignment, @message]) do |form| %>
+    <div class="field">
+      <%= form.text_area :body, rows: 3, placeholder: "Напишите сообщение..." %>
+    </div>
+    <%= form.submit "Отправить сообщение", class: "btn btn-primary" %>
+  <% end %>
+</div>

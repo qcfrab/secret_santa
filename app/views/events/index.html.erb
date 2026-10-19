@@ -1,15 +1,33 @@
-<h1>Мои игры</h1>
+<div class="page-header">
+  <h1>Мои игры</h1>
+  <%= link_to "+ Создать игру", new_event_path, class: "btn btn-primary" %>
+</div>
 
 <% if @events.any? %>
-  <% @events.each do |event| %>
-    <div class="card">
-      <h2><%= link_to event.name, event %></h2>
-      <p><span class="badge"><%= event.drawn? ? "Жеребьёвка проведена" : "Набор участников" %></span></p>
-      <% if event.budget %><p>Бюджет: <%= event.budget %> ₽</p><% end %>
-    </div>
-  <% end %>
+  <div class="events-grid">
+    <% @events.each do |event| %>
+      <div class="card">
+        <div>
+          <p style="margin-bottom: 0.5rem;">
+            <span class="badge <%= event.drawn? ? 'badge-drawn' : 'badge-waiting' %>">
+              <%= event.drawn? ? "✓ Жеребьёвка проведена" : "⏳ Набор участников" %>
+            </span>
+          </p>
+          <h2><%= link_to event.name, event %></h2>
+          <% if event.budget %>
+            <p style="color: var(--text-muted);">Бюджет подарка: <strong><%= event.budget %> ₽</strong></p>
+          <% end %>
+        </div>
+        <div style="margin-top: 1rem;">
+          <%= link_to "Перейти к игре →", event, class: "btn btn-outline btn-sm" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
 <% else %>
-  <p>У вас пока нет игр.</p>
+  <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+    <h3>У вас пока нет активных игр</h3>
+    <p style="color: var(--text-muted);">Создайте свою игру и пригласите друзей по ссылке!</p>
+    <%= link_to "Создать игру", new_event_path, class: "btn btn-primary" %>
+  </div>
 <% end %>
-
-<%= link_to "Создать игру", new_event_path, class: "btn btn-primary" %>
