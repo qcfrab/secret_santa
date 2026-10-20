@@ -1,18 +1,10 @@
 <%= form_with(model: wish) do |form| %>
-  <% if wish.errors.any? %>
-    <div class="alert-error">
-      <strong>Не удалось сохранить желание:</strong>
-      <ul>
-        <% wish.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
+  <div class="field <%= 'field-error' if wish.errors[:title].any? %>">
     <%= form.label :title, "Название подарка" %>
     <%= form.text_field :title, placeholder: "Например: Виниловая пластинка или тёплый шарф" %>
+    <% if wish.errors[:title].any? %>
+      <span class="error-text"><%= wish.errors[:title].first %></span>
+    <% end %>
   </div>
 
   <div class="field">

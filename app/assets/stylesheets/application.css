@@ -598,6 +598,18 @@ input[readonly] {
     margin: 0.25rem 0 0;
 }
 
+.field-error input,
+.field-error textarea {
+    border-color: #b3404a;
+    background: #fdf3f3;
+}
+.error-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    color: #b3404a;
+}
+
 /* --- Секция Героя (Главная страница) --- */
 .hero {
     background-color: var(--bg-surface);
