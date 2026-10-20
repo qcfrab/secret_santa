@@ -27,7 +27,6 @@ erDiagram
         string title
         text description
         string url
-        string image_url
         bigint user_id FK
     }
   events {
