@@ -13,7 +13,7 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
     def create_user
       @n = (@n || 0) + 1
-      User.create!(email: "user#{@n}@example.com", password: "password123")
+      User.create!(email: "user#{@n}@example.com", nickname: "user#{@n}", password: "password123")
     end
   end
 end
