@@ -8,27 +8,24 @@
 erDiagram
   users ||--o{ wishes : "has"
   users ||--o{ events : "organizes"
-  users ||--o{ participations : "joins"
+  users ||--o{ participations : "joins as santa"
+  users ||--o{ participations : "is giftee in"
   events ||--o{ participations : "has"
-  events ||--o{ assignments : "has"
-  users ||--o{ assignments : "is santa in"
-  users ||--o{ assignments : "is giftee in"
-  assignments ||--o{ messages : "has"
-  users ||--o{ messages : "sends"
+  participations ||--o{ messages : "has"
 
-    users {
-        bigint id PK
-        string email
-        string encrypted_password
-        string nickname
-    }
-    wishes {
-        bigint id PK
-        string title
-        text description
-        string url
-        bigint user_id FK
-    }
+  users {
+    bigint id PK
+    string email
+    string encrypted_password
+    string nickname
+  }
+  wishes {
+    bigint id PK
+    string title
+    text description
+    string url
+    bigint user_id FK
+  }
   events {
     bigint id PK
     string name
@@ -43,17 +40,12 @@ erDiagram
     bigint id PK
     bigint event_id FK
     bigint user_id FK
-  }
-  assignments {
-    bigint id PK
-    bigint event_id FK
-    bigint santa_id FK
     bigint giftee_id FK
   }
   messages {
     bigint id PK
-    bigint assignment_id FK
-    bigint sender_id FK
+    bigint participation_id FK
+    boolean from_santa
     text body
   }
 ```

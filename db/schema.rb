@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_113757) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_185215) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,25 +42,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_113757) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "assignments", force: :cascade do |t|
-    t.bigint "event_id", null: false
-    t.bigint "santa_id", null: false
-    t.bigint "giftee_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["event_id", "giftee_id"], name: "index_assignments_on_event_id_and_giftee_id", unique: true
-    t.index ["event_id", "santa_id"], name: "index_assignments_on_event_id_and_santa_id", unique: true
-    t.index ["event_id"], name: "index_assignments_on_event_id"
-    t.index ["giftee_id"], name: "index_assignments_on_giftee_id"
-    t.index ["santa_id"], name: "index_assignments_on_santa_id"
-  end
-
   create_table "events", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
     t.integer "budget"
     t.date "exchange_date"
-    t.string "invite_code"
+    t.string "invite_code", null: false
     t.integer "status", default: 0, null: false
     t.bigint "organizer_id", null: false
     t.datetime "created_at", null: false
@@ -70,13 +57,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_113757) do
   end
 
   create_table "messages", force: :cascade do |t|
-    t.bigint "assignment_id", null: false
-    t.bigint "sender_id", null: false
-    t.text "body"
+    t.text "body", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["assignment_id"], name: "index_messages_on_assignment_id"
-    t.index ["sender_id"], name: "index_messages_on_sender_id"
+    t.bigint "participation_id", null: false
+    t.boolean "from_santa", default: true, null: false
+    t.index ["participation_id"], name: "index_messages_on_participation_id"
   end
 
   create_table "participations", force: :cascade do |t|
@@ -84,9 +70,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_113757) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "giftee_id"
+    t.index ["event_id", "giftee_id"], name: "index_participations_on_event_id_and_giftee_id", unique: true
     t.index ["event_id", "user_id"], name: "index_participations_on_event_id_and_user_id", unique: true
-    t.index ["event_id"], name: "index_participations_on_event_id"
+    t.index ["giftee_id"], name: "index_participations_on_giftee_id"
     t.index ["user_id"], name: "index_participations_on_user_id"
+    t.check_constraint "user_id <> giftee_id", name: "participations_user_id_not_giftee_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -104,7 +93,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_113757) do
   end
 
   create_table "wishes", force: :cascade do |t|
-    t.string "title"
+    t.string "title", null: false
     t.text "description"
     t.string "url"
     t.bigint "user_id", null: false
@@ -115,13 +104,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_113757) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "assignments", "events"
-  add_foreign_key "assignments", "users", column: "giftee_id"
-  add_foreign_key "assignments", "users", column: "santa_id"
   add_foreign_key "events", "users", column: "organizer_id"
-  add_foreign_key "messages", "assignments"
-  add_foreign_key "messages", "users", column: "sender_id"
+  add_foreign_key "messages", "participations"
   add_foreign_key "participations", "events"
   add_foreign_key "participations", "users"
+  add_foreign_key "participations", "users", column: "giftee_id"
   add_foreign_key "wishes", "users"
 end

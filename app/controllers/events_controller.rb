@@ -7,8 +7,8 @@ class EventsController < ApplicationController
 
   def show
     @event = current_user.events.find(params[:id])
-    @santa_assignment = @event.assignments.find_by(santa: current_user)
-    @giftee_assignment = @event.assignments.find_by(giftee: current_user)
+    @santa_participation = @event.participations.find_by(user: current_user)
+    @giftee_participation = @event.participations.find_by(giftee: current_user)
   end
 
   def new

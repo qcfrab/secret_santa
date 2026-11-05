@@ -38,15 +38,15 @@ class EventTest < ActiveSupport::TestCase
   test "draw! создаёт назначение на каждого и меняет статус" do
     2.times { @event.join(create_user) }
     @event.draw!
-    assert_equal 3, @event.assignments.count
+    assert_equal 3, @event.participations.where.not(giftee_id: nil).count
     assert @event.drawn?
   end
 
   test "draw! никого не назначает самому себе, получатели уникальны" do
     4.times { @event.join(create_user) }
     @event.draw!
-    assert @event.assignments.none? { |a| a.santa_id == a.giftee_id }
-    assert_equal 5, @event.assignments.map(&:giftee_id).uniq.size
+    assert @event.participations.none? { |p| p.user_id == p.giftee_id }
+    assert_equal 5, @event.participations.map(&:giftee_id).uniq.size
   end
 
   test "draw! падает, если участников мало" do

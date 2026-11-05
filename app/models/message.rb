@@ -1,17 +1,23 @@
 class Message < ApplicationRecord
-  belongs_to :assignment
-  belongs_to :sender, class_name: "User"
+  belongs_to :participation
 
   validates :body, presence: true, length: { maximum: 1000 }
-  validate :sender_is_participant
+  validates :from_santa, inclusion: { in: [true, false] }
 
-  def from_santa?
-    sender_id == assignment.santa_id
+  scope :from_santa, -> { where(from_santa: true) }
+  scope :from_giftee, -> { where(from_santa: false) }
+
+  # Returns the User who sent the message
+  def sender
+    from_santa? ? participation.user : participation.giftee
   end
 
-  private
+  # Returns the User who receives the message
+  def recipient
+    from_santa? ? participation.giftee : participation.user
+  end
 
-  def sender_is_participant
-    errors.add(:sender, "не участвует в этом чате") unless assignment&.participant?(sender)
+  def from_giftee?
+    !from_santa?
   end
 end

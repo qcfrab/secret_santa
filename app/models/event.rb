@@ -5,7 +5,7 @@ class Event < ApplicationRecord
   belongs_to :organizer, class_name: "User"
   has_many :participations, dependent: :destroy
   has_many :users, through: :participations
-  has_many :assignments, dependent: :destroy
+  has_many :messages, through: :participations
 
   enum :status, { waiting: 0, drawn: 1 }
 
@@ -29,9 +29,10 @@ class Event < ApplicationRecord
     raise DrawError, "Нужно минимум #{MIN_PARTICIPANTS} участника" unless can_draw?
 
     transaction do
-      santas = users.to_a.shuffle
-      santas.each_with_index do |santa, i|
-        assignments.create!(santa: santa, giftee: santas[(i + 1) % santas.size])
+      event_participations = participations.to_a.shuffle
+      event_participations.each_with_index do |participation, i|
+        giftee_user = event_participations[(i + 1) % event_participations.size].user
+        participation.update!(giftee: giftee_user)
       end
       drawn!
     end

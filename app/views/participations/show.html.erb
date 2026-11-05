@@ -1,12 +1,12 @@
-<% is_santa = current_user.id == @assignment.santa_id %>
+<% is_santa = current_user.id == @participation.user_id %>
 
-<p><%= link_to "← Вернуться к игре «#{@assignment.event.name}»", @assignment.event %></p>
+<p><%= link_to "← Вернуться к игре «#{@participation.event.name}»", @participation.event %></p>
 
-<h1><%= is_santa ? "Вы дарите подарок: #{@assignment.giftee.display_name}" : "Чат с вашим Тайным Сантой" %></h1>
+<h1><%= is_santa ? "Вы дарите подарок: #{@participation.giftee.display_name}" : "Чат с вашим Тайным Сантой" %></h1>
 
 <% if is_santa %>
   <h2>Вишлист получателя</h2>
-  <% all_wishes = @assignment.giftee_wishes %>
+  <% all_wishes = @participation.giftee_wishes %>
   <% wish_page = [params.fetch(:wish_page, 1).to_i, 1].max %>
   <% per_page = 3 %>
   <% total_wish_pages = [(all_wishes.count.to_f / per_page).ceil, 1].max %>
@@ -21,17 +21,17 @@
 
     <nav class="pagination" aria-label="Пагинация вишлиста получателя">
       <% if wish_page > 1 %>
-        <%= link_to "← Назад", assignment_path(@assignment, wish_page: wish_page - 1), class: "page-link" %>
+        <%= link_to "← Назад", participation_path(@participation, wish_page: wish_page - 1), class: "page-link" %>
       <% else %>
         <span class="page-link disabled">← Назад</span>
       <% end %>
 
       <% (1..[total_wish_pages, 2].max).each do |p| %>
-        <%= link_to p, assignment_path(@assignment, wish_page: p), class: "page-link #{'active' if p == wish_page}" %>
+        <%= link_to p, participation_path(@participation, wish_page: p), class: "page-link #{'active' if p == wish_page}" %>
       <% end %>
 
       <% if wish_page < total_wish_pages %>
-        <%= link_to "Вперёд →", assignment_path(@assignment, wish_page: wish_page + 1), class: "page-link" %>
+        <%= link_to "Вперёд →", participation_path(@participation, wish_page: wish_page + 1), class: "page-link" %>
       <% else %>
         <span class="page-link disabled">Вперёд →</span>
       <% end %>
@@ -51,15 +51,15 @@
     <% end %>
 
     <% @messages.each do |message| %>
-      <% mine = message.sender_id == current_user.id %>
+      <% mine = is_santa ? message.from_santa? : !message.from_santa? %>
       <div class="chat-bubble <%= 'mine' if mine %>">
-        <small><%= mine ? "Вы" : @assignment.chat_partner_name_for(current_user) %></small>
+        <small><%= mine ? "Вы" : @participation.chat_partner_name_for(current_user) %></small>
         <p><%= message.body %></p>
       </div>
     <% end %>
   </div>
 
-  <%= form_with(model: [@assignment, @message]) do |form| %>
+  <%= form_with(model: [@participation, @message]) do |form| %>
     <div class="field">
       <%= form.text_area :body, rows: 3, placeholder: "Напишите сообщение..." %>
     </div>
