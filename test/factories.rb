@@ -1,14 +1,9 @@
 # test/factories.rb
-require_relative "support/factory_bot"
 
 FactoryBot.define do
-  sequence :email do |n|
-    "user_#{n}_#{Time.now.to_i}@example.com"
-  end
+  sequence(:email)    { |n| "user_#{n}@example.com" }
 
-  sequence :nickname do |n|
-    "santa_#{n}_#{Time.now.to_i % 10000}"
-  end
+  sequence(:nickname) { |n| "santa_#{n}" }
 
   sequence :event_name do |n|
     "Secret Santa Party #{n}"
