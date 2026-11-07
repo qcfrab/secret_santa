@@ -104,4 +104,26 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_select "dialog#delete-modal", count: 0
     assert_select "form.button_to[action=?]", event_path(@event), count: 0
   end
+
+  test "index view shows games list and general create button when user has games" do
+    sign_in @organizer
+    get events_path
+    assert_response :success
+
+    assert_select ".events-grid"
+    assert_select ".page-header a.btn.btn-primary[href=?]", new_event_path, text: "+ Создать игру", count: 1
+    assert_select ".card h3", text: "У вас пока нет активных игр", count: 0
+  end
+
+  test "index view shows only one create button inside empty state when user has no games" do
+    new_user = create(:user)
+    sign_in new_user
+    get events_path
+    assert_response :success
+
+    assert_select ".events-grid", count: 0
+    assert_select ".page-header a.btn.btn-primary", count: 0
+    assert_select ".card a.btn.btn-primary[href=?]", new_event_path, text: "Создать игру", count: 1
+    assert_select "a[href=?]", new_event_path, count: 1
+  end
 end

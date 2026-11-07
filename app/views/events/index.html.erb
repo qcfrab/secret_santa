@@ -1,9 +1,9 @@
-<div class="page-header">
-  <h1>Мои игры</h1>
-  <%= link_to "+ Создать игру", new_event_path, class: "btn btn-primary" %>
-</div>
-
 <% if @events.any? %>
+  <div class="page-header">
+    <h1>Мои игры</h1>
+    <%= link_to "+ Создать игру", new_event_path, class: "btn btn-primary" %>
+  </div>
+
   <div class="events-grid">
     <% @events.each do |event| %>
       <div class="card">
@@ -25,6 +25,10 @@
     <% end %>
   </div>
 <% else %>
+  <div class="page-header">
+    <h1>Мои игры</h1>
+  </div>
+
   <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
     <h3>У вас пока нет активных игр</h3>
     <p style="color: var(--text-muted);">Создайте свою игру и пригласите друзей по ссылке!</p>
