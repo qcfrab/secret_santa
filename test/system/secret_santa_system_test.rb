@@ -51,4 +51,31 @@ class SecretSantaSystemTest < ApplicationSystemTestCase
     assert_text "Жеребьёвка проведена"
     assert event.reload.drawn?
   end
+
+  test "organizer can open delete confirmation modal, cancel it, and then delete the game" do
+    organizer = create(:user)
+    event = create(:event, organizer: organizer, name: "Event to Delete")
+
+    sign_in organizer
+    visit event_path(event)
+
+    assert_button "Удалить игру"
+    click_on "Удалить игру"
+
+    assert_text "Вы уверены, что хотите удалить игру? Это действие нельзя отменить."
+    assert_button "Отмена"
+    assert_button "Удалить"
+
+    click_on "Отмена"
+    assert Event.exists?(event.id)
+
+    click_on "Удалить игру"
+    within "#delete-modal" do
+      click_on "Удалить"
+    end
+
+    assert_text "Игра удалена"
+    assert_current_path events_path
+    assert_not Event.exists?(event.id)
+  end
 end

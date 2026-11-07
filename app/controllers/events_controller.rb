@@ -32,6 +32,16 @@ class EventsController < ApplicationController
     redirect_to @event, alert: e.message
   end
 
+  def destroy
+    @event = current_user.organized_events.find(params[:id])
+    @event.destroy
+
+    respond_to do |format|
+      format.html { redirect_to events_path, notice: "Игра удалена", status: :see_other }
+      format.turbo_stream { redirect_to events_path, notice: "Игра удалена", status: :see_other }
+    end
+  end
+
   private
 
   def event_params

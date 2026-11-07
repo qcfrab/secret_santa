@@ -228,6 +228,35 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
           post events_path, params: { event: { name: "Sneaky Event" } }
           assert_redirected_to new_user_session_path
         end
+
+        it "prevents an unrelated user from deleting an event" do
+          target_event = event
+          sign_in unrelated
+          assert_no_difference("Event.count") do
+            delete event_path(target_event)
+          end
+          assert_response :not_found
+          assert target_event.reload.persisted?
+        end
+
+        it "prevents a non-organizer participant from deleting an event" do
+          target_event = event
+          sign_in participant
+          assert_no_difference("Event.count") do
+            delete event_path(target_event)
+          end
+          assert_response :not_found
+          assert target_event.reload.persisted?
+        end
+
+        it "redirects unauthenticated guests trying to delete an event" do
+          target_event = event
+          assert_no_difference("Event.count") do
+            delete event_path(target_event)
+          end
+          assert_redirected_to new_user_session_path
+          assert target_event.reload.persisted?
+        end
       end
     end
 
@@ -419,6 +448,89 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
           assert_equal giftee, reply.sender
           assert_equal santa, reply.recipient
         end
+      end
+    end
+
+    # ==========================================================================
+    # 5. EVENT DELETION & CASCADE CLEANUP
+    # ==========================================================================
+    describe "Event Deletion & Cascade Cleanup" do
+      let(:organizer) { create(:user) }
+      let(:alice)     { create(:user) }
+      let(:bob)       { create(:user) }
+      let(:event) do
+        e = create(:event, organizer: organizer)
+        e.join(alice)
+        e.join(bob)
+        e.draw!
+        e
+      end
+
+      it "renders the delete button and custom confirmation modal only for the organizer" do
+        # Organizer view check
+        sign_in organizer
+        get event_path(event)
+        assert_response :success
+
+        assert_select "button.btn.btn-danger.btn-sm", text: "Удалить игру"
+        assert_select "dialog#delete-modal.modal-dialog" do
+          assert_select "p.modal-body", text: "Вы уверены, что хотите удалить игру? Это действие нельзя отменить."
+          assert_select "button", text: "Отмена"
+          assert_select "form.button_to[action=?]", event_path(event) do
+            assert_select "button.btn.btn-danger.btn-sm", text: "Удалить"
+          end
+        end
+        assert_select "[data-turbo-confirm]", count: 0
+
+        # Non-organizer participant view check
+        sign_in alice
+        get event_path(event)
+        assert_response :success
+        assert_select "button", text: "Удалить игру", count: 0
+        assert_select "dialog#delete-modal", count: 0
+        assert_select "form.button_to[action=?]", event_path(event), count: 0
+      end
+
+      it "allows the organizer to delete the event, cascades dependent records, and redirects to root" do
+        # Add messages to participations to test cascade deletion of chat messages and pair assignments
+        participation = event.participations.first
+        message = create(:message, participation: participation, body: "Secret gift hint")
+        message_id = message.id
+        participation_ids = event.participation_ids
+
+        sign_in organizer
+        assert_difference("Event.count", -1) do
+          assert_difference("Participation.count", -3) do
+            assert_difference("Message.count", -1) do
+              delete event_path(event)
+            end
+          end
+        end
+
+        assert_redirected_to events_path
+        follow_redirect!
+        assert_response :success
+        assert_equal "Игра удалена", flash[:notice]
+
+        # Verify no orphaned records exist in database
+        assert_not Event.exists?(event.id)
+        assert_empty Participation.where(id: participation_ids)
+        assert_not Message.exists?(message_id)
+
+        # Verify users and wishes are not deleted
+        assert organizer.reload.persisted?
+        assert alice.reload.persisted?
+        assert bob.reload.persisted?
+      end
+
+      it "supports Turbo stream requests for deletion" do
+        target_event = event
+        sign_in organizer
+        assert_difference("Event.count", -1) do
+          delete event_path(target_event), as: :turbo_stream
+        end
+        assert_redirected_to events_path
+        assert_response :see_other
       end
     end
   end

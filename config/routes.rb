@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   resources :wishes
   devise_for :users, path: ''
 
-  resources :events, only: %i[index show new create] do
+  resources :events, only: %i[index show new create destroy] do
     post :draw, on: :member
   end
   get  "join/:code", to: "joins#show",   as: :join

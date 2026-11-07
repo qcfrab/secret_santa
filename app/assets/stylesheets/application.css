@@ -664,3 +664,55 @@ input[type="file"]::file-selector-button {
 input[type="file"]::file-selector-button:hover {
     background-color: var(--accent);
 }
+
+/* --- Модальное окно подтверждения --- */
+dialog.modal-dialog:not([open]) {
+    display: none;
+}
+
+dialog.modal-dialog {
+    border: none;
+    border-radius: var(--radius);
+    padding: 0;
+    background: transparent;
+    max-width: 480px;
+    width: 90%;
+    margin: auto;
+    box-shadow: 0 10px 40px rgba(41, 47, 42, 0.2);
+}
+
+dialog.modal-dialog::backdrop {
+    background-color: rgba(41, 47, 42, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.modal-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.modal-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.35rem;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--text-main);
+}
+
+.modal-body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+}

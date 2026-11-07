@@ -58,4 +58,22 @@ class EventTest < ActiveSupport::TestCase
     @event.draw!
     assert_raises(Event::DrawError) { @event.draw! }
   end
+
+  test "destroy каскадно удаляет участников и их сообщения" do
+    2.times { @event.join(create_user) }
+    @event.draw!
+    participation = @event.participations.first
+    message = participation.messages.create!(body: "Тестовое сообщение", from_santa: true)
+
+    assert_difference("Event.count", -1) do
+      assert_difference("Participation.count", -3) do
+        assert_difference("Message.count", -1) do
+          @event.destroy
+        end
+      end
+    end
+
+    assert_not Participation.exists?(participation.id)
+    assert_not Message.exists?(message.id)
+  end
 end

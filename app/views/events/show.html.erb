@@ -70,3 +70,24 @@
     <% end %>
   </div>
 <% end %>
+
+<% if current_user == @event.organizer %>
+  <div data-controller="modal" style="margin-top: 2.5rem; display: flex; justify-content: flex-end;">
+    <button type="button" class="btn btn-danger btn-sm" data-action="click->modal#open" onclick="document.getElementById('delete-modal')?.showModal()">
+      Удалить игру
+    </button>
+
+    <dialog id="delete-modal" class="modal-dialog" data-modal-target="dialog" data-action="click->modal#backdropClose" onclick="if (event.target === this) this.close()">
+      <div class="modal-card">
+        <h3 class="modal-title">Удаление игры</h3>
+        <p class="modal-body">Вы уверены, что хотите удалить игру? Это действие нельзя отменить.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline btn-sm" data-action="click->modal#close" onclick="this.closest('dialog').close()">
+            Отмена
+          </button>
+          <%= button_to "Удалить", @event, method: :delete, class: "btn btn-danger btn-sm" %>
+        </div>
+      </div>
+    </dialog>
+  </div>
+<% end %>
