@@ -1,0 +1,13 @@
+<%
+  mine = local_assigns[:mine]
+  partner_name = message.participation.giftee&.display_name || "Получатель"
+%>
+<div id="<%= dom_id(message) %>"
+     class="chat-bubble <%= 'mine' if mine %> <%= message.from_santa? ? 'from-santa' : 'from-giftee' %>"
+     data-from-santa="<%= message.from_santa? %>">
+  <small>
+    <span class="author-for-santa"><%= message.from_santa? ? "Вы" : partner_name %></span>
+    <span class="author-for-giftee"><%= message.from_santa? ? "Тайный Санта" : "Вы" %></span>
+  </small>
+  <p><%= message.body %></p>
+</div>

@@ -448,6 +448,34 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
           assert_equal giftee, reply.sender
           assert_equal santa, reply.recipient
         end
+
+        it "responds to Turbo Stream requests and resets form without duplicating message in response" do
+          assert_difference("participation.messages.count", 1) do
+            post participation_messages_path(participation),
+                 params: { message: { body: "Real-time Turbo message" } },
+                 as: :turbo_stream
+          end
+
+          assert_response :success
+          assert_equal "text/vnd.turbo-stream.html; charset=utf-8", response.content_type
+          assert_select "turbo-stream[action='replace'][target='new_message_form']"
+          assert_select "turbo-stream[action='remove'][target='no_messages']"
+          # Verify the HTTP response itself does not append the message (Action Cable handles real-time delivery)
+          assert_select "turbo-stream[action='append'][target='messages']", count: 0
+        end
+
+        it "returns unprocessable_entity and renders form with errors on invalid Turbo Stream request" do
+          assert_no_difference("Message.count") do
+            post participation_messages_path(participation),
+                 params: { message: { body: "" } },
+                 as: :turbo_stream
+          end
+
+          assert_response :unprocessable_entity
+          assert_equal "text/vnd.turbo-stream.html; charset=utf-8", response.content_type
+          assert_select "turbo-stream[action='replace'][target='new_message_form']"
+          assert_select ".alert-error"
+        end
       end
     end
 

@@ -44,25 +44,18 @@
 <% end %>
 
 <h2>Анонимный чат</h2>
-<div class="chat-box">
-  <div class="chat-messages">
+<%= turbo_stream_from @participation %>
+<div class="chat-box" data-role="<%= is_santa ? 'santa' : 'giftee' %>" data-controller="chat" data-chat-role-value="<%= is_santa ? 'santa' : 'giftee' %>">
+  <div id="messages" class="chat-messages" data-chat-target="messages">
     <% if @messages.empty? %>
-      <p style="color: var(--text-muted); text-align: center; margin: 1.5rem 0;">Сообщений пока нет. Напишите первым!</p>
+      <p id="no_messages" style="color: var(--text-muted); text-align: center; margin: 1.5rem 0;">Сообщений пока нет. Напишите первым!</p>
     <% end %>
 
     <% @messages.each do |message| %>
       <% mine = is_santa ? message.from_santa? : !message.from_santa? %>
-      <div class="chat-bubble <%= 'mine' if mine %>">
-        <small><%= mine ? "Вы" : @participation.chat_partner_name_for(current_user) %></small>
-        <p><%= message.body %></p>
-      </div>
+      <%= render "messages/message", message: message, mine: mine %>
     <% end %>
   </div>
 
-  <%= form_with(model: [@participation, @message]) do |form| %>
-    <div class="field">
-      <%= form.text_area :body, rows: 3, placeholder: "Напишите сообщение..." %>
-    </div>
-    <%= form.submit "Отправить сообщение", class: "btn btn-primary" %>
-  <% end %>
+  <%= render "messages/form", participation: @participation, message: @message %>
 </div>
