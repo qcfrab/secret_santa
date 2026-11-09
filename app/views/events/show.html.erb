@@ -51,21 +51,21 @@
 
 <% if @event.drawn? %>
   <div class="events-grid">
-    <% if @santa_participation %>
+    <% if @santa_assignment %>
       <div class="card">
         <span class="badge badge-waiting" style="margin-bottom: 0.75rem;">Миссия Санты</span>
-        <h2>Вы дарите подарок: <%= @santa_participation.giftee.display_name %></h2>
+        <h2>Вы дарите подарок: <%= @santa_assignment.giftee.display_name %></h2>
         <p style="color: var(--text-muted);">Изучите вишлист получателя или задайте анонимный вопрос в чате.</p>
-        <%= link_to "Вишлист и чат →", participation_path(@santa_participation), class: "btn btn-primary" %>
+        <%= link_to "Вишлист и чат →", assignment_path(@santa_assignment), class: "btn btn-primary" %>
       </div>
     <% end %>
 
-    <% if @giftee_participation %>
+    <% if @giftee_assignment %>
       <div class="card">
         <span class="badge badge-drawn" style="margin-bottom: 0.75rem;">Ваш даритель</span>
         <h2>Чат с вашим Тайным Сантой</h2>
         <p style="color: var(--text-muted);">Санта остаётся анонимным, но вы можете переписываться с ним здесь.</p>
-        <%= link_to "Открыть чат →", participation_path(@giftee_participation), class: "btn btn-secondary" %>
+        <%= link_to "Открыть чат →", assignment_path(@giftee_assignment), class: "btn btn-secondary" %>
       </div>
     <% end %>
   </div>

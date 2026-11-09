@@ -1,61 +1,6 @@
-<% is_santa = current_user.id == @participation.user_id %>
-
-<p><%= link_to "← Вернуться к игре «#{@participation.event.name}»", @participation.event %></p>
-
-<h1><%= is_santa ? "Вы дарите подарок: #{@participation.giftee.display_name}" : "Чат с вашим Тайным Сантой" %></h1>
-
-<% if is_santa %>
-  <h2>Вишлист получателя</h2>
-  <% all_wishes = @participation.giftee_wishes %>
-  <% wish_page = [params.fetch(:wish_page, 1).to_i, 1].max %>
-  <% per_page = 3 %>
-  <% total_wish_pages = [(all_wishes.count.to_f / per_page).ceil, 1].max %>
-  <% wishes = all_wishes.offset((wish_page - 1) * per_page).limit(per_page) %>
-
-  <% if wishes.any? %>
-    <div class="wishes-grid">
-      <% wishes.each do |wish| %>
-        <%= render "wishes/wish", wish: wish %>
-      <% end %>
-    </div>
-
-    <nav class="pagination" aria-label="Пагинация вишлиста получателя">
-      <% if wish_page > 1 %>
-        <%= link_to "← Назад", participation_path(@participation, wish_page: wish_page - 1), class: "page-link" %>
-      <% else %>
-        <span class="page-link disabled">← Назад</span>
-      <% end %>
-
-      <% (1..[total_wish_pages, 2].max).each do |p| %>
-        <%= link_to p, participation_path(@participation, wish_page: p), class: "page-link #{'active' if p == wish_page}" %>
-      <% end %>
-
-      <% if wish_page < total_wish_pages %>
-        <%= link_to "Вперёд →", participation_path(@participation, wish_page: wish_page + 1), class: "page-link" %>
-      <% else %>
-        <span class="page-link disabled">Вперёд →</span>
-      <% end %>
-    </nav>
-  <% else %>
-    <div class="card">
-      <p style="margin-bottom: 0; color: var(--text-muted);">Получатель пока ничего не добавил в свой вишлист.</p>
-    </div>
-  <% end %>
+<%
+  @assignment ||= @participation&.assignment_as_santa || @participation&.assignment_as_giftee
+%>
+<% if @assignment %>
+  <%= render file: Rails.root.join("app/views/assignments/show.html.erb") %>
 <% end %>
-
-<h2>Анонимный чат</h2>
-<%= turbo_stream_from @participation %>
-<div class="chat-box" data-role="<%= is_santa ? 'santa' : 'giftee' %>" data-controller="chat" data-chat-role-value="<%= is_santa ? 'santa' : 'giftee' %>">
-  <div id="messages" class="chat-messages" data-chat-target="messages">
-    <% if @messages.empty? %>
-      <p id="no_messages" style="color: var(--text-muted); text-align: center; margin: 1.5rem 0;">Сообщений пока нет. Напишите первым!</p>
-    <% end %>
-
-    <% @messages.each do |message| %>
-      <% mine = is_santa ? message.from_santa? : !message.from_santa? %>
-      <%= render "messages/message", message: message, mine: mine %>
-    <% end %>
-  </div>
-
-  <%= render "messages/form", participation: @participation, message: @message %>
-</div>

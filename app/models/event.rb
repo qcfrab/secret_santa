@@ -5,7 +5,8 @@ class Event < ApplicationRecord
   belongs_to :organizer, class_name: "User"
   has_many :participations, dependent: :destroy
   has_many :users, through: :participations
-  has_many :messages, through: :participations
+  has_many :assignments, through: :participations, source: :assignment_as_santa
+  has_many :messages, through: :assignments
 
   enum :status, { waiting: 0, drawn: 1 }
 
@@ -31,8 +32,11 @@ class Event < ApplicationRecord
     transaction do
       event_participations = participations.to_a.shuffle
       event_participations.each_with_index do |participation, i|
-        giftee_user = event_participations[(i + 1) % event_participations.size].user
-        participation.update!(giftee: giftee_user)
+        giftee_participation = event_participations[(i + 1) % event_participations.size]
+        Assignment.create!(
+          santa_participation: participation,
+          giftee_participation: giftee_participation
+        )
       end
       drawn!
     end

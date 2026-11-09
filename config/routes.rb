@@ -9,6 +9,9 @@ Rails.application.routes.draw do
   end
   get  "join/:code", to: "joins#show",   as: :join
   post "join/:code", to: "joins#create"
+  resources :assignments, only: :show do
+    resources :messages, only: :create
+  end
   resources :participations, only: :show do
     resources :messages, only: :create
   end

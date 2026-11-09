@@ -1,10 +1,11 @@
+<% target = @assignment || @participation %>
 <% if @message.persisted? %>
   <%= turbo_stream.remove "no_messages" %>
   <%= turbo_stream.replace "new_message_form" do %>
-    <%= render "messages/form", participation: @participation, message: Message.new %>
+    <%= render "messages/form", assignment: target, message: Message.new %>
   <% end %>
 <% else %>
   <%= turbo_stream.replace "new_message_form" do %>
-    <%= render "messages/form", participation: @participation, message: @message %>
+    <%= render "messages/form", assignment: target, message: @message %>
   <% end %>
 <% end %>

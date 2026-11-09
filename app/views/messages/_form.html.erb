@@ -1,5 +1,6 @@
+<% target = local_assigns[:assignment] || local_assigns[:participation] %>
 <%= turbo_frame_tag "new_message_form" do %>
-  <%= form_with(model: [participation, message], id: "message_form") do |form| %>
+  <%= form_with(model: [target, message], id: "message_form") do |form| %>
     <% if message.errors.any? %>
       <div class="alert-error" style="margin-bottom: 1rem;">
         <% message.errors.full_messages.each do |error| %>

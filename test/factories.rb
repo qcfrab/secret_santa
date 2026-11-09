@@ -40,8 +40,13 @@ FactoryBot.define do
     user { FactoryBot.create(:user) }
   end
 
+  factory :assignment do
+    santa_participation { FactoryBot.create(:participation) }
+    giftee_participation { FactoryBot.create(:participation, event: santa_participation.event) }
+  end
+
   factory :message do
-    participation { FactoryBot.create(:participation) }
+    assignment { FactoryBot.create(:assignment) }
     body { "Ho ho ho! Looking forward to giving your gift!" }
     from_santa { true }
   end

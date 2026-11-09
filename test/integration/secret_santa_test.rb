@@ -126,35 +126,37 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         # Every participant must have a non-nil giftee and nobody is their own Santa
         event.participations.each do |participation|
           assert_not_nil participation.giftee, "Participant #{participation.user.nickname} has no giftee"
-          assert_not_equal participation.user_id, participation.giftee_id, "Participant cannot be their own Secret Santa"
+          assert_not_equal participation.user, participation.giftee, "Participant cannot be their own Secret Santa"
         end
-        # Ensure all giftees are unique (everyone gets a gift)
-        assert_equal 3, event.participations.map(&:giftee_id).uniq.size
+        assert_equal 3, event.assignments.count
+        assert_equal 3, event.assignments.map(&:giftee_participation_id).uniq.size
+        assert_equal 3, event.assignments.map(&:santa_participation_id).uniq.size
 
         # ----------------------------------------------------------------------
         # Step 6: Sends a message in the event's anonymous chat
         # ----------------------------------------------------------------------
         organizer_participation = event.participations.find_by!(user: organizer)
+        organizer_assignment = organizer_participation.assignment_as_santa
 
-        get participation_path(organizer_participation)
+        get assignment_path(organizer_assignment)
         assert_response :success
 
         chat_body = "Ho Ho Ho! I am your Secret Santa. Excited to surprise you!"
-        assert_difference("organizer_participation.messages.count", 1) do
-          post participation_messages_path(organizer_participation), params: {
+        assert_difference("organizer_assignment.messages.count", 1) do
+          post assignment_messages_path(organizer_assignment), params: {
             message: { body: chat_body }
           }
         end
 
-        assert_redirected_to participation_path(organizer_participation)
+        assert_redirected_to assignment_path(organizer_assignment)
         follow_redirect!
         assert_response :success
 
-        message = organizer_participation.messages.last
+        message = organizer_assignment.messages.last
         assert_equal chat_body, message.body
         assert_equal true, message.from_santa
         assert_equal organizer, message.sender
-        assert_equal organizer_participation.giftee, message.recipient
+        assert_equal organizer_assignment.giftee, message.recipient
       end
     end
 
@@ -280,7 +282,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
           follow_redirect!
           assert_equal "Нужно минимум 3 участника", flash[:alert]
           assert event.reload.waiting?
-          assert_empty event.participations.where.not(giftee_id: nil)
+          assert_empty event.assignments
         end
 
         it "prevents name draw when the event has only 2 participants" do
@@ -358,12 +360,12 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         e
       end
 
-      let(:participation) { event.participations.first }
+      let(:assignment) { event.assignments.first }
 
       describe "Unauthorized Access to Chat Room" do
         it "denies an outsider attempting to view a chat room they are not a participant in" do
           sign_in outsider
-          get participation_path(participation)
+          get assignment_path(assignment)
           assert_response :not_found
         end
 
@@ -371,7 +373,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
           sign_in outsider
 
           assert_no_difference("Message.count") do
-            post participation_messages_path(participation), params: {
+            post assignment_messages_path(assignment), params: {
               message: { body: "I shouldn't be here!" }
             }
           end
@@ -379,16 +381,16 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         end
 
         it "denies a participant from posting into a pairing chat that does not involve them" do
-          # Find a participation in the event where bob is neither Santa nor Giftee
-          target_participation = event.participations.find do |p|
-            p.user_id != bob.id && p.giftee_id != bob.id
+          # Find an assignment in the event where bob is neither Santa nor Giftee
+          target_assignment = event.assignments.find do |a|
+            a.santa != bob && a.giftee != bob
           end
-          assert_not_nil target_participation, "A disjoint pairing should exist in a 3-person circle"
+          assert_not_nil target_assignment, "A disjoint pairing should exist in a 3-person circle"
 
           sign_in bob
 
           assert_no_difference("Message.count") do
-            post participation_messages_path(target_participation), params: {
+            post assignment_messages_path(target_assignment), params: {
               message: { body: "Eavesdropping message" }
             }
           end
@@ -397,61 +399,61 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
       end
 
       describe "Chat Input Edge Cases & Validations" do
-        let(:santa) { participation.user }
+        let(:santa) { assignment.santa }
 
         before { sign_in santa }
 
         it "rejects an empty chat message" do
           assert_no_difference("Message.count") do
-            post participation_messages_path(participation), params: {
+            post assignment_messages_path(assignment), params: {
               message: { body: "" }
             }
           end
 
-          assert_redirected_to participation_path(participation)
+          assert_redirected_to assignment_path(assignment)
         end
 
         it "rejects a whitespace-only chat message" do
           assert_no_difference("Message.count") do
-            post participation_messages_path(participation), params: {
+            post assignment_messages_path(assignment), params: {
               message: { body: "    \n\t   " }
             }
           end
 
-          assert_redirected_to participation_path(participation)
+          assert_redirected_to assignment_path(assignment)
         end
 
         it "rejects messages exceeding the maximum allowed character limit (1000 characters)" do
           oversized_body = "A" * 1001
 
           assert_no_difference("Message.count") do
-            post participation_messages_path(participation), params: {
+            post assignment_messages_path(assignment), params: {
               message: { body: oversized_body }
             }
           end
 
-          assert_redirected_to participation_path(participation)
+          assert_redirected_to assignment_path(assignment)
         end
 
         it "correctly assigns from_santa: false when giftee sends a reply message" do
-          giftee = participation.giftee
+          giftee = assignment.giftee
           sign_in giftee
 
-          assert_difference("participation.messages.count", 1) do
-            post participation_messages_path(participation), params: {
+          assert_difference("assignment.messages.count", 1) do
+            post assignment_messages_path(assignment), params: {
               message: { body: "Thank you for being my Secret Santa!" }
             }
           end
 
-          reply = participation.messages.last
+          reply = assignment.messages.last
           assert_equal false, reply.from_santa
           assert_equal giftee, reply.sender
           assert_equal santa, reply.recipient
         end
 
         it "responds to Turbo Stream requests and resets form without duplicating message in response" do
-          assert_difference("participation.messages.count", 1) do
-            post participation_messages_path(participation),
+          assert_difference("assignment.messages.count", 1) do
+            post assignment_messages_path(assignment),
                  params: { message: { body: "Real-time Turbo message" } },
                  as: :turbo_stream
           end
@@ -466,7 +468,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
 
         it "returns unprocessable_entity and renders form with errors on invalid Turbo Stream request" do
           assert_no_difference("Message.count") do
-            post participation_messages_path(participation),
+            post assignment_messages_path(assignment),
                  params: { message: { body: "" } },
                  as: :turbo_stream
           end
@@ -520,17 +522,20 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
       end
 
       it "allows the organizer to delete the event, cascades dependent records, and redirects to root" do
-        # Add messages to participations to test cascade deletion of chat messages and pair assignments
-        participation = event.participations.first
-        message = create(:message, participation: participation, body: "Secret gift hint")
+        # Add messages to assignments to test cascade deletion of chat messages and pair assignments
+        assignment = event.assignments.first
+        message = create(:message, assignment: assignment, body: "Secret gift hint")
         message_id = message.id
         participation_ids = event.participation_ids
+        assignment_ids = event.assignment_ids
 
         sign_in organizer
         assert_difference("Event.count", -1) do
           assert_difference("Participation.count", -3) do
-            assert_difference("Message.count", -1) do
-              delete event_path(event)
+            assert_difference("Assignment.count", -3) do
+              assert_difference("Message.count", -1) do
+                delete event_path(event)
+              end
             end
           end
         end
@@ -543,6 +548,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         # Verify no orphaned records exist in database
         assert_not Event.exists?(event.id)
         assert_empty Participation.where(id: participation_ids)
+        assert_empty Assignment.where(id: assignment_ids)
         assert_not Message.exists?(message_id)
 
         # Verify users and wishes are not deleted

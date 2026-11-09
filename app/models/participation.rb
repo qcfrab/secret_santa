@@ -1,35 +1,31 @@
 class Participation < ApplicationRecord
   belongs_to :event
   belongs_to :user
-  belongs_to :giftee, class_name: "User", optional: true
 
-  has_many :messages, dependent: :destroy
+  has_one :assignment_as_santa, class_name: "Assignment", foreign_key: :santa_participation_id, dependent: :destroy, inverse_of: :santa_participation
+  has_one :assignment_as_giftee, class_name: "Assignment", foreign_key: :giftee_participation_id, dependent: :destroy, inverse_of: :giftee_participation
+
+  has_one :giftee_participation, through: :assignment_as_santa, source: :giftee_participation
+  has_one :santa_participation, through: :assignment_as_giftee, source: :santa_participation
+
+  has_one :giftee, through: :giftee_participation, source: :user
+  has_one :santa, through: :santa_participation, source: :user
 
   validates :user_id, uniqueness: { scope: :event_id }
-  validates :giftee_id, uniqueness: { scope: :event_id }, allow_nil: true
-  validate :santa_is_not_giftee
 
-  alias_method :santa, :user
+  def participant?(target_user)
+    return false unless target_user
 
-  def participant?(user)
-    return false unless user
-
-    user.id == user_id || user.id == giftee_id
+    target_user.id == user_id || target_user.id == giftee&.id || target_user.id == santa&.id
   end
 
   def giftee_wishes
     giftee&.wishes || Wish.none
   end
 
-  def chat_partner_name_for(user)
-    return nil unless participant?(user)
+  def chat_partner_name_for(target_user)
+    return nil unless participant?(target_user)
 
-    user.id == user_id ? giftee&.display_name : "Тайный Санта"
-  end
-
-  private
-
-  def santa_is_not_giftee
-    errors.add(:giftee, "не может совпадать с дарителем") if giftee_id.present? && user_id == giftee_id
+    target_user.id == user_id ? giftee&.display_name : "Тайный Санта"
   end
 end

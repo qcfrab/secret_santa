@@ -7,7 +7,6 @@ class User < ApplicationRecord
   has_many :organized_events, class_name: "Event", foreign_key: :organizer_id, dependent: :destroy
   has_many :participations, dependent: :destroy
   has_many :events, through: :participations
-  has_many :giftee_participations, class_name: "Participation", foreign_key: :giftee_id, dependent: :nullify, inverse_of: :giftee
 
   attr_writer :login
 

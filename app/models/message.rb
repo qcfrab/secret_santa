@@ -1,5 +1,5 @@
 class Message < ApplicationRecord
-  belongs_to :participation
+  belongs_to :assignment
 
   validates :body, presence: true, length: { maximum: 1000 }
   validates :from_santa, inclusion: { in: [true, false] }
@@ -11,12 +11,12 @@ class Message < ApplicationRecord
 
   # Returns the User who sent the message
   def sender
-    from_santa? ? participation.user : participation.giftee
+    from_santa? ? assignment.santa : assignment.giftee
   end
 
   # Returns the User who receives the message
   def recipient
-    from_santa? ? participation.giftee : participation.user
+    from_santa? ? assignment.giftee : assignment.santa
   end
 
   def from_giftee?
@@ -26,6 +26,6 @@ class Message < ApplicationRecord
   private
 
   def broadcast_message
-    broadcast_append_to participation, target: "messages", partial: "messages/message", locals: { message: self }
+    broadcast_append_to assignment, target: "messages", partial: "messages/message", locals: { message: self }
   end
 end

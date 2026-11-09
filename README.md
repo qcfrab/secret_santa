@@ -8,10 +8,11 @@
 erDiagram
   users ||--o{ wishes : "has"
   users ||--o{ events : "organizes"
-  users ||--o{ participations : "joins as santa"
-  users ||--o{ participations : "is giftee in"
+  users ||--o{ participations : "has"
   events ||--o{ participations : "has"
-  participations ||--o{ messages : "has"
+  participations ||--o{ assignments : "is santa in"
+  participations ||--o{ assignments : "is giftee in"
+  assignments ||--o{ messages : "has"
 
   users {
     bigint id PK
@@ -38,14 +39,18 @@ erDiagram
   }
   participations {
     bigint id PK
-    bigint event_id FK
     bigint user_id FK
-    bigint giftee_id FK
+    bigint event_id FK
+  }
+  assignments {
+    bigint id PK
+    bigint santa_participation_id FK
+    bigint giftee_participation_id FK
   }
   messages {
     bigint id PK
-    bigint participation_id FK
-    boolean from_santa
+    bigint assignment_id FK
     text body
+    boolean from_santa
   }
 ```

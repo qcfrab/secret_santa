@@ -9,8 +9,8 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     @event.join(@alice)
     @event.join(@bob)
     @event.draw!
-    @participation = @event.participations.first
-    @message = create(:message, participation: @participation, body: "Hello Santa")
+    @assignment = @event.assignments.first
+    @message = create(:message, assignment: @assignment, body: "Hello Santa")
   end
 
   test "creator can delete the event and its dependent records" do
@@ -21,8 +21,10 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference("Event.count", -1) do
       assert_difference("Participation.count", -3) do
-        assert_difference("Message.count", -1) do
-          delete event_path(@event)
+        assert_difference("Assignment.count", -3) do
+          assert_difference("Message.count", -1) do
+            delete event_path(@event)
+          end
         end
       end
     end
