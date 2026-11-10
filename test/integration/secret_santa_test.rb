@@ -1,33 +1,20 @@
-# test/integration/secret_santa_test.rb
 require "test_helper"
 
 class SecretSantaTest < ActionDispatch::IntegrationTest
   describe "Secret Santa Web Application Integration" do
-    # --------------------------------------------------------------------------
-    # Database Cleanup & Fixture Isolation
-    # Rails transactional tests (use_transactional_tests = true) automatically
-    # wrap each test in a database transaction and roll back on completion.
-    # --------------------------------------------------------------------------
-
-    # ==========================================================================
     # 1. THE HAPPY PATH
-    # ==========================================================================
     describe "Happy Path: Full Secret Santa Lifecycle" do
       let(:organizer) { create(:user) }
       let(:alice)     { create(:user) }
       let(:bob)       { create(:user) }
 
       it "allows a user to sign in, create an event, manage wishlist, invite friends, draw names, and chat" do
-        # ----------------------------------------------------------------------
         # Step 1: User signs in
-        # ----------------------------------------------------------------------
         sign_in organizer
         get root_path
         assert_response :success
 
-        # ----------------------------------------------------------------------
         # Step 2: Creates a Secret Santa event
-        # ----------------------------------------------------------------------
         get new_event_path
         assert_response :success
 
@@ -54,9 +41,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         assert event.waiting?
         assert_not_nil event.invite_code
 
-        # ----------------------------------------------------------------------
         # Step 3: Adds items to their personal wishlist
-        # ----------------------------------------------------------------------
         get new_wish_path
         assert_response :success
 
@@ -78,9 +63,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         assert_equal organizer, wish.user
         assert_equal "Mechanical Keyboard", wish.title
 
-        # ----------------------------------------------------------------------
         # Step 4: Invites / adds participants via the unique invite link
-        # ----------------------------------------------------------------------
         # Participant 1 (Alice) signs in and joins
         sign_in alice
         get join_path(code: event.invite_code)
@@ -108,9 +91,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         assert_equal 3, event.participations.count
         assert event.can_draw?
 
-        # ----------------------------------------------------------------------
         # Step 5: Organizer triggers the random name draw
-        # ----------------------------------------------------------------------
         sign_in organizer
         post draw_event_path(event)
 
@@ -132,9 +113,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
         assert_equal 3, event.assignments.map(&:giftee_participation_id).uniq.size
         assert_equal 3, event.assignments.map(&:santa_participation_id).uniq.size
 
-        # ----------------------------------------------------------------------
         # Step 6: Sends a message in the event's anonymous chat
-        # ----------------------------------------------------------------------
         organizer_participation = event.participations.find_by!(user: organizer)
         organizer_assignment = organizer_participation.assignment_as_santa
 
@@ -160,9 +139,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
       end
     end
 
-    # ==========================================================================
     # 2. BRANCH / EDGE CASE 1: AUTHORIZATION FAILURE
-    # ==========================================================================
     describe "Authorization Security & Access Control" do
       let(:victim)      { create(:user) }
       let(:attacker)    { create(:user) }
@@ -262,9 +239,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
       end
     end
 
-    # ==========================================================================
     # 3. BRANCH / EDGE CASE 2: BUSINESS LOGIC / STATE GUARDS
-    # ==========================================================================
     describe "Business Logic & State Guards" do
       let(:organizer) { create(:user) }
       let(:event)     { create(:event, organizer: organizer) }
@@ -343,9 +318,7 @@ class SecretSantaTest < ActionDispatch::IntegrationTest
       end
     end
 
-    # ==========================================================================
     # 4. BRANCH / EDGE CASE 3: CHAT SECURITY & EDGE INPUT
-    # ==========================================================================
     describe "Chat Security & Input Validation" do
       let(:organizer) { create(:user) }
       let(:alice)     { create(:user) }

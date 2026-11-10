@@ -10,7 +10,11 @@
     <% end %>
 
     <div class="field">
-      <%= form.text_area :body, rows: 3, placeholder: "Напишите сообщение...", id: "message_body" %>
+      <%= form.text_area :body,
+                         rows: 3,
+                         placeholder: "Напишите сообщение...",
+                         id: "message_body",
+                         data: { action: "keydown->chat#submit" } %>
     </div>
     <%= form.submit "Отправить сообщение", class: "btn btn-primary" %>
   <% end %>
