@@ -87,9 +87,11 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: secret_santa_production
-    username: secret_santa
-    password: <%= ENV["SECRET_SANTA_DATABASE_PASSWORD"] %>
+    host: <%= ENV.fetch("PGHOST") %>
+    port: <%= ENV.fetch("PGPORT") %>
+    database: <%= ENV.fetch("PGDATABASE") %>
+    username: <%= ENV.fetch("PGUSER") %>
+    password: <%= ENV.fetch("PGPASSWORD") %>
   cache:
     <<: *primary_production
     database: secret_santa_production_cache
